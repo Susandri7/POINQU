@@ -8,10 +8,23 @@
             <h3 class="text-lg font-bold mb-3">Menu Admin</h3>
             <ul class="list-disc pl-5 space-y-2">
                 <li><a href="{{ route('aktivasi') }}" class="text-blue-600 hover:underline">Aktivasi UMKM</a></li>
+                {{-- ✅ Tombol Backup Manual --}}
+
+<li> <a href="{{ route('backup.download') }}" class="text-blue-600 hover:underline">📦 Backup Sekarang</a> </li>
+
+@if(session('error'))
+<div class="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">
+{{ session('error') }}
+</div>
+@endif
+
+
+
                 <li><a href="{{ url('/form-preview') }}" class="text-blue-600 hover:underline">Preview Landing Page</a></li>
                 <li><a href="{{ url('/admin/member') }}" class="text-blue-600 hover:underline">Semua Data Member</a></li>
                 <li><a href="{{ url('/admin/settings') }}" class="text-blue-600 hover:underline">Atur Maksimal Landing Page</a></li>
             </ul>
+            
         @else
         {{-- Untuk UMKM --}}
             <h3 class="text-lg font-bold mb-3">Menu UMKM</h3>
@@ -25,7 +38,7 @@
                 <li><a href="{{ route('landing.index') }}" class="text-blue-600 hover:underline">Kelola Landing Page</a></li>
             </ul>
         @endif
-
+     
     </div>
 </div>
 </x-app-layout>

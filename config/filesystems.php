@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+              // ✅ Tambahkan ini:
+         'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            
+
+        ],
+
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

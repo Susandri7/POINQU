@@ -42,19 +42,27 @@ Input Kode Member
             let member = {};
 
             function cekKode() {
-                let kode = document.getElementById("kodeUnik").value;
-                if (!kode) return alert("Masukkan kode!");
-                fetch("/api/cek-kode/" + kode)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!data.success) return Swal.fire("Gagal", "Kode tidak ditemukan", "error");
-                        member = data.member;
-                        document.getElementById("hasilCek").innerHTML = `<b>${member.nama}</b><br>Poin: ${member.poin}`;
-                        document.getElementById("hasilCek").style.display = "block";
-                        document.getElementById("tambahPoinArea").style.display = "block";
-                        document.getElementById("tukarPoinArea").style.display = "block";
-                    });
-            }
+    let kode = document.getElementById("kodeUnik").value;
+    if (!kode) return alert("Masukkan kode!");
+
+    fetch("/api/cek-kode/" + kode)
+        .then(res => {
+            if (!res.ok) throw new Error("Server error / kode tidak ditemukan");
+            return res.json();
+        })
+        .then(data => {
+            if (!data.success) return Swal.fire("Gagal", "Kode tidak ditemukan", "error");
+
+            member = data.member;
+            document.getElementById("hasilCek").innerHTML = `<b>${member.nama}</b><br>Poin: ${member.poin}`;
+            document.getElementById("hasilCek").style.display = "block";
+            document.getElementById("tambahPoinArea").style.display = "block";
+            document.getElementById("tukarPoinArea").style.display = "block";
+        })
+        .catch(err => {
+            Swal.fire("Gagal", err.message, "error");
+        });
+}
 
             function tambahPoin() {
                 let jumlah = parseInt(document.getElementById("customPoin").value);
@@ -79,28 +87,30 @@ Input Kode Member
             }
 
             function tukarPoin() {
-                let hadiah_id = document.getElementById("pilihanHadiah").value;
-                if (!hadiah_id) return alert("Pilih hadiah terlebih dahulu");
-                fetch("/api/tukar-poin", {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                    },
-                    body: JSON.stringify({
-                        kode: member.kode_unik,
-                        hadiah_id
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.success) return Swal.fire("Gagal", data.message, "error");
-                    Swal.fire("Berhasil", "Poin berhasil ditukar!", "success");
-                    document.getElementById("pesanPoin").innerHTML = `<p>${data.message}</p>`;
-                    document.getElementById("notifWA").innerHTML = `<a target="_blank" href="${data.link_wa}">📩 Kirim Notif WA</a>`;
-                    document.getElementById("notifWA").style.display = "block";
-                });
-            }
+    let hadiah_id = document.getElementById("pilihanHadiah").value;
+    if (!hadiah_id) return alert("Pilih hadiah terlebih dahulu");
+
+    fetch("/api/tukar-poin", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+            kode: member.kode_unik,
+            hadiah_id: hadiah_id
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) return Swal.fire("Gagal", data.message, "error");
+        Swal.fire("Berhasil", "Poin berhasil ditukar!", "success");
+
+        document.getElementById("pesanPoin").innerHTML = `<p>${data.message}</p>`;
+        document.getElementById("notifWA").innerHTML = `<a target="_blank" href="${data.link_wa}">📩 Kirim Notif WA</a>`;
+        document.getElementById("notifWA").style.display = "block";
+    });
+}
         </script>
     </div>
 </div>

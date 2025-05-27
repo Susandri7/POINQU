@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 
 
@@ -86,6 +88,35 @@ Route::middleware(['auth'])->group(function () {
         return back()->with('success', 'User berhasil diaktivasi!');
     })->name('aktivasi.proses');
 });
+
+// ----------Backup Download Dari dashboar Admin------
+
+Route::get('/admin/download-backup', function () {
+    $files = collect(Storage::disk('private')->files('laravel'))->sortDesc();
+    $latest = $files->first();
+    if (!$latest) {
+        if (request()->expectsJson()) {
+            return response()->json(['error' => 'File backup tidak ditemukan'], 404);
+        }
+        return back()->with('error', 'Belum ada file backup yang tersedia.');
+    }
+    return Storage::disk('private')->download($latest);
+})->middleware('auth')->name('backup.download');
+
+//ini yang berhasil
+//Route::get('/admin/download-backup', function () {
+    //$files = collect(Storage::disk('private')->files('laravel'))->sortDesc();
+    //$latest = $files->first();
+    //if (!$latest) {
+        //return back()->with('error', 'Belum ada file backup yang tersedia.');
+    //}
+    
+    //return Storage::disk('private')->download($latest);
+//})->middleware('auth')->name('backup.download');
+
+//berhasil
+
+
 
 // ------------------------
 // FITUR PROFIL DEFAULT BREEZE
