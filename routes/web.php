@@ -65,8 +65,12 @@ Route::middleware(['auth', 'aktif'])->group(function () {
     Route::post('/pengaturan', [SettingController::class, 'update'])->name('pengaturan.update');
     });
 // ------------------------
+Route::get('/landing/{id}/edit', [App\Http\Controllers\LandingPageController::class, 'edit'])->name('landing.edit');
+Route::put('/landing/{id}', [App\Http\Controllers\LandingPageController::class, 'update'])->name('landing.update');
 
-
+//Route::get('/landing/{id}/edit', [LandingPageController::class, 'edit'])->name('landing.edit');
+//Route::put('/landing/{id}', [LandingPageController::class, 'update'])->name('landing.update');
+Route::delete('/landing/{id}', [LandingPageController::class, 'destroy'])->name('landing.destroy');
 // ------------------------
 // HALAMAN AKTIVASI USER (KHUSUS ADMIN)
 Route::middleware(['auth'])->group(function () {
@@ -128,6 +132,9 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
+
+//----------------------------
+//Route::get('/{slug}', [LandingPageController::class, 'show'])->name('landing.show');
 // ------------------------
 // ⛔ Wildcard slug HARUS PALING BAWAH!
 Route::get('/{slug}', function ($slug) {
