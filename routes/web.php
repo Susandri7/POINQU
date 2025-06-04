@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MemberFormController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\MemberDashboardController;
+use App\Http\Controllers\AktivasiController;
 use App\Models\LandingPage;
 use App\Models\User;
 use App\Http\Controllers\SettingController;
@@ -22,7 +23,8 @@ Route::get('/', function () {
 // Halaman dashboard setelah login & verifikasi email
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+//})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'cek-masa-aktif'])->name('dashboard');
 
 // ------------------------
 // FORM PENDAFTARAN UMUM (Publik)
@@ -72,26 +74,9 @@ Route::put('/landing/{id}', [App\Http\Controllers\LandingPageController::class, 
 //Route::put('/landing/{id}', [LandingPageController::class, 'update'])->name('landing.update');
 Route::delete('/landing/{id}', [LandingPageController::class, 'destroy'])->name('landing.destroy');
 // ------------------------
-// HALAMAN AKTIVASI USER (KHUSUS ADMIN)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/aktivasi', function () {
-        if (Auth::user()->email !== 'admin@poinqu.my.id') {
-            abort(403, 'Kamu bukan admin.');
-        }
-        $users = User::where('status_aktif', false)->get();
-        return view('aktivasi', compact('users'));
-    })->name('aktivasi');
 
-    Route::post('/aktivasi/{id}', function ($id) {
-        if (Auth::user()->email !== 'admin@poinqu.my.id') {
-            abort(403, 'Kamu bukan admin.');
-        }
-        $user = User::findOrFail($id);
-        $user->status_aktif = true;
-        $user->save();
-        return back()->with('success', 'User berhasil diaktivasi!');
-    })->name('aktivasi.proses');
-});
+Route::middleware(['auth'])->get('/aktivasi', [AktivasiController::class, 'index'])->name('aktivasi');
+Route::middleware(['auth'])->post('/aktivasi/{id}', [AktivasiController::class, 'proses'])->name('aktivasi.proses');
 
 // ----------Backup Download Dari dashboar Admin------
 
