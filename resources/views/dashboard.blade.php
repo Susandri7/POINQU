@@ -1,6 +1,21 @@
 <x-app-layout>
+@php
+    // Pastikan variabel $umkmExpSoon selalu ada agar tidak error di blade,
+    // baik dikirim dari controller admin atau tidak.
+    if (!isset($umkmExpSoon)) $umkmExpSoon = collect();
+@endphp
+
 <div class="min-h-screen bg-[#f6f5ef] py-8 px-4">
 <x-app-header/>
+
+    {{-- Debug info tampil hanya untuk admin --}}
+    @if(Auth::user()->email === 'admin@poinqu.my.id')
+        <div class="mb-4 bg-gray-100 p-2 text-xs rounded">
+            <strong>Debug (jumlah user menjelang expired):</strong>
+            <span>{{ $umkmExpSoon->count() }}</span>
+            <pre>{{ print_r($umkmExpSoon->toArray(), 1) }}</pre>
+        </div>
+    @endif
 
     <div class="min-h-screen bg-[#f6f5ef] py-8 px-4">
         <div class="flex flex-col md:flex-row gap-8">
@@ -12,6 +27,7 @@
                     <x-sidebar-umkm />
                 @endif
             </div>
+
             {{-- Main Content --}}
             <div class="flex-1 flex flex-col gap-6">
                 <div class="bg-white border rounded-xl shadow p-6 mb-6">
@@ -19,7 +35,6 @@
                     <p class="text-gray-600 text-lg">Ini adalah halaman dashboard utama aplikasi Anda.</p>
                 </div>
 
-                
                 {{-- Contoh statistik/dashboard lainnya --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="bg-white border rounded-xl shadow p-6 flex items-center gap-4">
@@ -44,7 +59,54 @@
                         </div>
                     </div>
                 </div>
-                {{-- Area lain bisa ditambah di sini --}}
+
+                @if(Auth::user()->email === 'admin@poinqu.my.id')
+                    @if($umkmExpSoon->count())
+                        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6 rounded">
+                            <strong>UMKM/Member yang akan expired dalam 3 bulan ke depan:</strong>
+                            <table class="min-w-full mt-3 text-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="px-2 py-1">Nama</th>
+                                        <th class="px-2 py-1">Email</th>
+                                        <th class="px-2 py-1">No WA</th>
+                                        <th class="px-2 py-1">Expired</th>
+                                        <th class="px-2 py-1">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($umkmExpSoon as $user)
+                                    <tr>
+                                        <td class="px-2 py-1">{{ $user->name }}</td>
+                                        <td class="px-2 py-1">{{ $user->email }}</td>
+                                        <td class="px-2 py-1">{{ $user->no_wa ?? '-' }}</td>
+                                        <td class="px-2 py-1">{{ \Carbon\Carbon::parse($user->aktif_sampai)->format('d M Y H:i') }}</td>
+                                        <td class="px-2 py-1">
+                                            @php
+                                                $waNumber = $user->no_wa ? preg_replace('/[^0-9]/', '', $user->no_wa) : '';
+                                                if($waNumber && str_starts_with($waNumber, '0')) $waNumber = '62' . substr($waNumber, 1);
+                                                $msg = urlencode("Halo $user->name, masa aktif akun Anda akan berakhir pada ".\Carbon\Carbon::parse($user->aktif_sampai)->format('d M Y H:i').". Silakan perpanjang untuk tetap dapat menggunakan layanan.");
+                                                $waLink = $waNumber ? "https://wa.me/$waNumber?text=$msg" : '';
+                                            @endphp
+                                            @if($waLink)
+                                                <a href="{{ $waLink }}" target="_blank" class="inline-block bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+                                                    Kirim WA
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">No WA tidak ada</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6 rounded">
+                            <em>Tidak ada UMKM/member yang akan expired dalam 3 bulan ke depan.</em>
+                        </div>
+                    @endif
+                @endif
             </div>
         </div>
     </div>

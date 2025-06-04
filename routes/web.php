@@ -38,6 +38,10 @@ Route::middleware(['auth', 'aktif'])->group(function () {
 });
 
 // ------------------------
+
+Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
+
+// ------------------------
 Route::middleware(['auth', 'aktif'])->group(function () {
     Route::get('/member', [MemberDashboardController::class, 'index'])->name('member.index');
     Route::post('/member/tambah-poin/{id}', [MemberDashboardController::class, 'tambahPoin'])->name('member.tambah-poin');
