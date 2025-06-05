@@ -22,13 +22,12 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-
     public static function redirectTo()
-{
-if (auth()->user()->email === 'admin@poinqu.my.id') {
-return '/dashboard'; // Bisa /admin/dashboard
-} else {
-return '/dashboard'; // UMKM biasa
-}
-}
+    {
+        if (auth()->user()->role === 'admin') { // Ganti dari email ke role
+            return '/dashboard'; // Bisa /admin/dashboard
+        } else {
+            return '/dashboard'; // UMKM biasa
+        }
+    }
 }

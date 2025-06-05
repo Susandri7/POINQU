@@ -59,6 +59,11 @@ Route::post('/aktivasi/perpanjang/{id}', [\App\Http\Controllers\AktivasiControll
 Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
 
 // ------------------------
+
+
+
+// ------------------------
+// ------------------------
 Route::middleware(['auth', 'aktif'])->group(function () {
     Route::get('/member', [MemberDashboardController::class, 'index'])->name('member.index');
     Route::post('/member/tambah-poin/{id}', [MemberDashboardController::class, 'tambahPoin'])->name('member.tambah-poin');
@@ -83,6 +88,15 @@ Route::middleware(['auth', 'aktif'])->group(function () {
 });
 
 // ------------------------
+
+// Pengaturan Landing Page (khusus admin)
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/settings', [\App\Http\Controllers\AdminLandingSettingController::class, 'index'])->name('admin.landing_settings');
+    Route::post('/admin/settings/{id}/max-pages', [\App\Http\Controllers\AdminLandingSettingController::class, 'updateMaxPages'])->name('admin.landing_settings.update_max_pages');
+});
+
+// ------------------------
+
 Route::middleware(['auth', 'aktif'])->group(function () {
     Route::get('/pengaturan', [SettingController::class, 'index'])->name('pengaturan.index');
     Route::post('/pengaturan', [SettingController::class, 'update'])->name('pengaturan.update');

@@ -12,7 +12,7 @@ class AktivasiController extends Controller
     // Halaman daftar user untuk aktivasi
     public function index()
     {
-        if (Auth::user()->email !== 'admin@poinqu.my.id') {
+        if (Auth::user()->role !== 'admin') {
             abort(403, 'Kamu bukan admin.');
         }
         // Ambil semua user (bisa filter sesuai kebutuhan)
@@ -23,12 +23,12 @@ class AktivasiController extends Controller
     // Proses aktivasi/nonaktifkan user
     public function proses(Request $request, $id)
     {
-        if (Auth::user()->email !== 'admin@poinqu.my.id') {
+        if (Auth::user()->role !== 'admin') {
             abort(403, 'Kamu bukan admin.');
         }
         $user = User::findOrFail($id);
 
-        if ($user->email === 'admin@poinqu.my.id') {
+        if ($user->role === 'admin') {
             return back()->with('success', 'Akun admin tidak boleh diubah statusnya.');
         }
         
@@ -78,7 +78,7 @@ class AktivasiController extends Controller
     // Proses perpanjangan masa aktif user
     public function perpanjang(Request $request, $id)
     {
-        if (Auth::user()->email !== 'admin@poinqu.my.id') {
+        if (Auth::user()->role !== 'admin') {
             abort(403, 'Kamu bukan admin.');
         }
 

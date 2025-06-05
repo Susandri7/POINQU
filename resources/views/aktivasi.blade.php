@@ -6,7 +6,7 @@
             <div class="flex flex-col md:flex-row gap-8">
                 {{-- Sidebar Menu --}}
                 <div class="w-full md:w-64">
-                    @if(Auth::user()->email === 'admin@poinqu.my.id')
+                    @if(Auth::user()->role === 'admin')
                         <x-sidebar-admin />
                     @else
                         <x-sidebar-umkm />

@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'aktif' => \App\Http\Middleware\CekStatusAktif::class,
             'cek-masa-aktif' => \App\Http\Middleware\CekMasaAktifUser::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
         // Tambahkan ini agar CekMasaAktifUser berjalan GLOBAL di semua request
         // $middleware->append(\App\Http\Middleware\CekMasaAktifUser::class);

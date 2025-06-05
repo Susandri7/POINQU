@@ -6,20 +6,13 @@
 <div class="min-h-screen bg-[#f6f5ef] py-8 px-4">
 <x-app-header/>
 
-    {{-- Debug info tampil hanya untuk admin --}}
-    @if(Auth::user()->email === 'admin@poinqu.my.id')
-        <div class="mb-4 bg-gray-100 p-2 text-xs rounded">
-            <strong>Debug (jumlah user menjelang expired):</strong>
-            <span>{{ $umkmExpSoon->count() }}</span>
-            <pre>{{ print_r($umkmExpSoon->toArray(), 1) }}</pre>
-        </div>
-    @endif
+   
 
     <div class="min-h-screen bg-[#f6f5ef] py-8 px-4">
         <div class="flex flex-col md:flex-row gap-8">
             {{-- Sidebar Menu --}}
             <div class="w-full md:w-64">
-                @if(Auth::user()->email === 'admin@poinqu.my.id')
+                @if(Auth::user()->role === 'admin')
                     <x-sidebar-admin />
                 @else
                     <x-sidebar-umkm />
@@ -33,6 +26,8 @@
                     <p class="text-gray-600 text-lg">Ini adalah halaman dashboard utama aplikasi Anda.</p>
                 </div>
 
+
+                @if(Auth::user()->role === 'admin')
                 {{-- Kartu Statistik UMKM 2 baris, 2 kolom --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {{-- Baris 1 --}}
@@ -67,8 +62,13 @@
                     </a>
                 </div>
 
+                @endif
+
+
+
+
                 {{-- Bagian lama: List UMKM yang akan expired dalam 3 bulan --}}
-                @if(Auth::user()->email === 'admin@poinqu.my.id')
+                @if(Auth::user()->role === 'admin')
                     @if($umkmExpSoon->count())
                         <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6 rounded-xl">
                             <strong>UMKM/Member yang akan expired dalam 3 bulan ke depan:</strong>

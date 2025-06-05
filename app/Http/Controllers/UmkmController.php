@@ -9,12 +9,12 @@ use Carbon\Carbon;
 class UmkmController extends Controller
 {
     public function index() {
-        $users = User::where('email', '!=', 'admin@poinqu.my.id')->get();
+        $users = User::where('role', 'umkm')->get();
         return view('umkm.index', compact('users'));
     }
 
     public function expiring() {
-        $users = User::where('email', '!=', 'admin@poinqu.my.id')
+        $users = User::where('role', 'umkm')
             ->whereNotNull('aktif_sampai')
             ->where('aktif_sampai', '>', Carbon::now())
             ->where('aktif_sampai', '<=', Carbon::now()->addMonths(3))
@@ -23,7 +23,7 @@ class UmkmController extends Controller
     }
 
     public function expired() {
-        $users = User::where('email', '!=', 'admin@poinqu.my.id')
+        $users = User::where('role', 'umkm')
             ->whereNotNull('aktif_sampai')
             ->where('aktif_sampai', '<', Carbon::now())
             ->get();
@@ -31,7 +31,7 @@ class UmkmController extends Controller
     }
 
     public function pending() {
-        $users = User::where('email', '!=', 'admin@poinqu.my.id')
+        $users = User::where('role', 'umkm')
             ->where(function($q){
                 $q->where('status_aktif', false)
                   ->orWhereNull('status_aktif');

@@ -14,7 +14,7 @@ class AdminDashboardController extends Controller
         $in90days = Carbon::today()->addDays(90);
 
         // List UMKM yang menjelang expired (3 bulan ke depan)
-        $umkmExpSoon = User::where('email', '!=', 'admin@poinqu.my.id')
+        $umkmExpSoon = User::where('role', 'umkm')
             ->where('status_aktif', true)
             ->whereNotNull('aktif_sampai')
             ->whereDate('aktif_sampai', '>=', $today)
@@ -22,19 +22,19 @@ class AdminDashboardController extends Controller
             ->get();
 
         // Total UMKM aktif
-        $totalUmkm = User::where('email', '!=', 'admin@poinqu.my.id')->count();
+        $totalUmkm = User::where('role', 'umkm')->count();
 
         // Total UMKM menjelang expired (3 bulan ke depan)
         $totalUmkmExpSoon = $umkmExpSoon->count();
 
         // Total UMKM expired
-        $totalUmkmExpired = User::where('email', '!=', 'admin@poinqu.my.id')
+        $totalUmkmExpired = User::where('role', 'umkm')
             ->whereNotNull('aktif_sampai')
             ->where('aktif_sampai', '<', Carbon::now())
             ->count();
 
         // Total UMKM menunggu aktivasi
-        $totalUmkmPending = User::where('email', '!=', 'admin@poinqu.my.id')
+        $totalUmkmPending = User::where('role', 'umkm')
             ->where(function($q){
                 $q->where('status_aktif', false)
                   ->orWhereNull('status_aktif');

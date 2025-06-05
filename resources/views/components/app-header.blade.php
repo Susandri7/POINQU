@@ -65,10 +65,8 @@
     @endif
 </div>
 
-
-
 <div class="container mx-auto">
-    @if(Auth::user() && Auth::user()->status_aktif == false && Auth::user()->email !== 'admin@poinqu.my.id')
+    @if(Auth::user() && Auth::user()->status_aktif == false && Auth::user()->role !== 'admin')
         @php
             $expired = Auth::user()->aktif_sampai && now()->greaterThan(Auth::user()->aktif_sampai);
         @endphp
@@ -86,7 +84,7 @@
         @endif
     @endif
 
-    @if(Auth::user() && Auth::user()->status_aktif == true && Auth::user()->email !== 'admin@poinqu.my.id')
+    @if(Auth::user() && Auth::user()->status_aktif == true && Auth::user()->role !== 'admin')
         @php
             $aktifSampai = Auth::user()->aktif_sampai ? \Carbon\Carbon::parse(Auth::user()->aktif_sampai) : null;
             $now = now();
