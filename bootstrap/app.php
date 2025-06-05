@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,19 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'aktif' => \App\Http\Middleware\CekStatusAktif::class,
             'cek-masa-aktif' => \App\Http\Middleware\CekMasaAktifUser::class,
-       
         ]);
-
-      
-
-
         // Tambahkan ini agar CekMasaAktifUser berjalan GLOBAL di semua request
-        //$middleware->append(\App\Http\Middleware\CekMasaAktifUser::class);
+        // $middleware->append(\App\Http\Middleware\CekMasaAktifUser::class);
     })
 
-    // ---------- Back Up Otomatis ----------
-    ->withSchedule(function (Illuminate\Console\Scheduling\Schedule $schedule) {
+    // Semua schedule di sini!
+    ->withSchedule(function (Schedule $schedule) {
         $schedule->command('backup:run')->dailyAt('03:00');
+        $schedule->command('user:nonaktifkan-expired')->everyMinute();
     })
 
     ->withExceptions(function (Exceptions $exceptions) {

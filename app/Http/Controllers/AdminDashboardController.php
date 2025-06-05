@@ -10,10 +10,10 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // Ambil semua user selain admin yang akan expired ≤ 90 hari ke depan, cek hanya TANGGAL (bukan jam) agar aman timezone dan pasti terjaring
         $today = Carbon::today();
         $in90days = Carbon::today()->addDays(90);
 
+        // List UMKM yang menjelang expired (3 bulan ke depan)
         $umkmExpSoon = User::where('email', '!=', 'admin@poinqu.my.id')
             ->where('status_aktif', true)
             ->whereNotNull('aktif_sampai')
@@ -21,8 +21,32 @@ class AdminDashboardController extends Controller
             ->whereDate('aktif_sampai', '<=', $in90days)
             ->get();
 
-        // Data dashboard lain ...
+        // Total UMKM aktif
+        $totalUmkm = User::where('email', '!=', 'admin@poinqu.my.id')->count();
 
-        return view('dashboard', compact('umkmExpSoon'));
+        // Total UMKM menjelang expired (3 bulan ke depan)
+        $totalUmkmExpSoon = $umkmExpSoon->count();
+
+        // Total UMKM expired
+        $totalUmkmExpired = User::where('email', '!=', 'admin@poinqu.my.id')
+            ->whereNotNull('aktif_sampai')
+            ->where('aktif_sampai', '<', Carbon::now())
+            ->count();
+
+        // Total UMKM menunggu aktivasi
+        $totalUmkmPending = User::where('email', '!=', 'admin@poinqu.my.id')
+            ->where(function($q){
+                $q->where('status_aktif', false)
+                  ->orWhereNull('status_aktif');
+            })
+            ->count();
+
+        return view('dashboard', compact(
+            'umkmExpSoon',
+            'totalUmkm',
+            'totalUmkmExpSoon',
+            'totalUmkmExpired',
+            'totalUmkmPending'
+        ));
     }
 }

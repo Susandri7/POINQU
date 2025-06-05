@@ -74,4 +74,59 @@ class AktivasiController extends Controller
         $user->save();
         return back()->with('success', $pesan);
     }
+
+    // Proses perpanjangan masa aktif user
+    public function perpanjang(Request $request, $id)
+    {
+        if (Auth::user()->email !== 'admin@poinqu.my.id') {
+            abort(403, 'Kamu bukan admin.');
+        }
+
+        $user = User::findOrFail($id);
+
+        // Ambil input durasi dan satuan
+        $durasi = (int) $request->input('durasi', 1);
+        $satuan = $request->input('satuan', 'hari');
+
+        // Penentuan waktu mulai penambahan: 
+        // - Jika masa aktif masih berlaku, perpanjang dari aktif_sampai
+        // - Jika sudah lewat (expired), perpanjang dari sekarang
+        $start = Carbon::now();
+        if ($user->aktif_sampai && Carbon::parse($user->aktif_sampai)->gt($start)) {
+            $start = Carbon::parse($user->aktif_sampai);
+        }
+
+        // Hitung tanggal baru setelah perpanjangan
+        switch ($satuan) {
+            case 'menit':
+                $akhir = $start->copy()->addMinutes($durasi);
+                break;
+            case 'jam':
+                $akhir = $start->copy()->addHours($durasi);
+                break;
+            case 'hari':
+                $akhir = $start->copy()->addDays($durasi);
+                break;
+            case 'bulan':
+                $akhir = $start->copy()->addMonths($durasi);
+                break;
+            case 'tahun':
+                $akhir = $start->copy()->addYears($durasi);
+                break;
+            default:
+                $akhir = $start->copy()->addDays($durasi);
+        }
+
+        // Set aktif_mulai jika user expired, jika tidak biarkan
+        if (!$user->aktif_mulai || Carbon::parse($user->aktif_sampai)->lt(Carbon::now())) {
+            $user->aktif_mulai = Carbon::now();
+        }
+
+        // Update masa aktif
+        $user->aktif_sampai = $akhir;
+        $user->status_aktif = true;
+        $user->save();
+
+        return redirect()->back()->with('success', 'Masa aktif berhasil diperpanjang!');
+    }
 }

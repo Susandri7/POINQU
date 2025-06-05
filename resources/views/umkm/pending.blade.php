@@ -1,10 +1,8 @@
 <x-app-layout>
     <div class="min-h-screen bg-[#f6f5ef] py-8 px-4">
         <x-app-header />
-
         <div class="min-h-screen bg-[#f6f5ef] py-8 px-4">
             <div class="flex flex-col md:flex-row gap-8">
-                {{-- Sidebar Menu --}}
                 <div class="w-full md:w-64">
                     @if(Auth::user()->email === 'admin@poinqu.my.id')
                         <x-sidebar-admin />
@@ -12,18 +10,16 @@
                         <x-sidebar-umkm />
                     @endif
                 </div>
-
-                {{-- Main Content --}}
                 <div class="flex-1">
                     <div class="bg-white border rounded-xl shadow p-6">
+                        <h2 class="text-xl font-bold mb-4">UMKM Menunggu Aktivasi</h2>
                         @if (session('success'))
                             <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
                                 {{ session('success') }}
                             </div>
                         @endif
-
                         @if (count($users) === 0)
-                            <p class="text-gray-500">Tidak ada user yang menunggu aktivasi.</p>
+                            <p class="text-gray-500">Tidak ada UMKM yang menunggu aktivasi.</p>
                         @else
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left rounded-xl overflow-hidden">
@@ -31,8 +27,8 @@
                                         <tr class="bg-yellow-400 text-gray-900">
                                             <th class="px-4 py-2">Nama</th>
                                             <th class="px-4 py-2">Email</th>
+                                            <th class="px-4 py-2">No WA</th>
                                             <th class="px-4 py-2">Daftar Pada</th>
-                                            <th class="px-4 py-2">Masa Aktif</th>
                                             <th class="px-4 py-2">Aksi</th>
                                             <th class="px-4 py-2">Perpanjang</th>
                                         </tr>
@@ -45,24 +41,8 @@
                                         <tr class="border-b last:border-none">
                                             <td class="px-4 py-2">{{ $user->name }}</td>
                                             <td class="px-4 py-2">{{ $user->email }}</td>
+                                            <td class="px-4 py-2">{{ $user->no_wa ?? '-' }}</td>
                                             <td class="px-4 py-2">{{ $user->created_at->format('d M Y H:i') }}</td>
-                                            <td class="px-4 py-2">
-                                                @if($user->status_aktif && $user->aktif_mulai && $user->aktif_sampai)
-                                                    <span class="inline-block bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
-                                                        {{ \Carbon\Carbon::parse($user->aktif_mulai)->format('d M Y H:i') }}
-                                                        s/d
-                                                        {{ \Carbon\Carbon::parse($user->aktif_sampai)->format('d M Y H:i') }}
-                                                    </span>
-                                                @elseif($user->status_aktif)
-                                                    <span class="inline-block bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
-                                                        Tidak terbatas
-                                                    </span>
-                                                @else
-                                                    <span class="inline-block bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs">
-                                                        Belum diaktivasi
-                                                    </span>
-                                                @endif
-                                            </td>
                                             <td class="px-4 py-2">
                                                 <div x-data="{ openModal: false }" class="inline-block">
                                                     <button
@@ -72,8 +52,6 @@
                                                     >
                                                         {{ $user->status_aktif ? 'Nonaktifkan' : 'Aktifkan' }}
                                                     </button>
-
-                                                    <!-- Modal -->
                                                     <div
                                                         x-show="openModal"
                                                         x-cloak
@@ -92,8 +70,6 @@
                                                                 class="flex flex-col gap-2"
                                                             >
                                                                 @csrf
-
-                                                                {{-- Input masa aktif hanya saat AKTIVASI --}}
                                                                 @if(!$user->status_aktif)
                                                                 <div class="mb-2">
                                                                     <label class="block text-sm text-gray-600 mb-1">Masa Aktif</label>
@@ -109,7 +85,6 @@
                                                                     </div>
                                                                 </div>
                                                                 @endif
-
                                                                 <div class="flex justify-end gap-2 mt-3">
                                                                     <button
                                                                         @click.prevent="openModal = false"
@@ -130,7 +105,6 @@
                                                 </div>
                                             </td>
                                             <td class="px-4 py-2">
-                                                {{-- Tombol Perpanjang muncul jika user aktif ATAU sudah expired --}}
                                                 @if($user->status_aktif || $isExpired)
                                                 <div x-data="{ openModalPerpanjang: false }" class="inline-block">
                                                     <button
@@ -140,7 +114,6 @@
                                                     >
                                                         Perpanjang
                                                     </button>
-                                                    <!-- Modal Perpanjang-->
                                                     <div
                                                         x-show="openModalPerpanjang"
                                                         x-cloak
@@ -200,6 +173,4 @@
         </div>
     </div>
 </x-app-layout>
-
-<!-- Pastikan tambahkan ini di <head> (resources/views/layouts/app.blade.php atau layout utama) -->
 <style>[x-cloak] { display: none !important; }</style>

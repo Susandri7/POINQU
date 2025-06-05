@@ -32,12 +32,14 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'no_wa' => ['required', 'regex:/^[0-9]{9,15}$/'], // WA wajib angka, 9-15 digit
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'no_wa' => $request->no_wa, // tambahkan ini
             'password' => Hash::make($request->password),
         ]);
 

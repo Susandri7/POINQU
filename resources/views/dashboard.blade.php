@@ -1,7 +1,5 @@
 <x-app-layout>
 @php
-    // Pastikan variabel $umkmExpSoon selalu ada agar tidak error di blade,
-    // baik dikirim dari controller admin atau tidak.
     if (!isset($umkmExpSoon)) $umkmExpSoon = collect();
 @endphp
 
@@ -35,34 +33,44 @@
                     <p class="text-gray-600 text-lg">Ini adalah halaman dashboard utama aplikasi Anda.</p>
                 </div>
 
-                {{-- Contoh statistik/dashboard lainnya --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-white border rounded-xl shadow p-6 flex items-center gap-4">
+                {{-- Kartu Statistik UMKM 2 baris, 2 kolom --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {{-- Baris 1 --}}
+                    <a href="{{ route('umkm.index') }}" class="bg-white border rounded-xl shadow p-6 flex items-center gap-4 transition hover:bg-green-50 cursor-pointer">
                         <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2l4-4m5 2a9 9 0 11-18 0a9 9 0 0118 0z"/></svg>
                         <div>
-                            <div class="text-lg font-bold">{{ $totalMember ?? 0 }}</div>
-                            <div class="text-gray-500">Total Member</div>
+                            <div class="text-lg font-bold">{{ $totalUmkm ?? 0 }}</div>
+                            <div class="text-gray-500">Total UMKM</div>
                         </div>
-                    </div>
-                    <div class="bg-white border rounded-xl shadow p-6 flex items-center gap-4">
+                    </a>
+                    <a href="{{ route('umkm.expiring') }}" class="bg-white border rounded-xl shadow p-6 flex items-center gap-4 transition hover:bg-yellow-50 cursor-pointer">
                         <svg class="w-10 h-10 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                         <div>
-                            <div class="text-lg font-bold">{{ $totalHadiah ?? 0 }}</div>
-                            <div class="text-gray-500">Total Hadiah</div>
+                            <div class="text-lg font-bold">{{ $totalUmkmExpSoon ?? 0 }}</div>
+                            <div class="text-gray-500">Total UMKM Menjelang Expired (3 bulan)</div>
                         </div>
-                    </div>
-                    <div class="bg-white border rounded-xl shadow p-6 flex items-center gap-4">
+                    </a>
+                    {{-- Baris 2 --}}
+                    <a href="{{ route('umkm.expired') }}" class="bg-white border rounded-xl shadow p-6 flex items-center gap-4 transition hover:bg-blue-50 cursor-pointer">
                         <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-5a9 9 0 11-18 0a9 9 0 0118 0z"/></svg>
                         <div>
-                            <div class="text-lg font-bold">{{ $totalTransaksi ?? 0 }}</div>
-                            <div class="text-gray-500">Total Transaksi</div>
+                            <div class="text-lg font-bold">{{ $totalUmkmExpired ?? 0 }}</div>
+                            <div class="text-gray-500">Total UMKM yang Expired</div>
                         </div>
-                    </div>
+                    </a>
+                    <a href="{{ route('umkm.pending') }}" class="bg-white border rounded-xl shadow p-6 flex items-center gap-4 transition hover:bg-gray-50 cursor-pointer">
+                        <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h4v4"/></svg>
+                        <div>
+                            <div class="text-lg font-bold">{{ $totalUmkmPending ?? 0 }}</div>
+                            <div class="text-gray-500">Total UMKM Menunggu Aktivasi</div>
+                        </div>
+                    </a>
                 </div>
 
+                {{-- Bagian lama: List UMKM yang akan expired dalam 3 bulan --}}
                 @if(Auth::user()->email === 'admin@poinqu.my.id')
                     @if($umkmExpSoon->count())
-                        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6 rounded">
+                        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6 rounded-xl">
                             <strong>UMKM/Member yang akan expired dalam 3 bulan ke depan:</strong>
                             <table class="min-w-full mt-3 text-sm">
                                 <thead>

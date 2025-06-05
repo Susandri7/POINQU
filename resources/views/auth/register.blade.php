@@ -16,6 +16,13 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+      <!-- WhatsApp Number -->
+      <div class="mt-4">
+            <x-input-label for="no_wa" :value="__('Nomor WhatsApp')" />
+            <x-text-input id="no_wa" class="block mt-1 w-full" type="text" name="no_wa" :value="old('no_wa')" required autocomplete="tel" maxlength="20" placeholder=""/>
+            <x-input-error :messages="$errors->get('no_wa')" class="mt-2" />
+        </div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

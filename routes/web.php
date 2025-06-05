@@ -39,6 +39,23 @@ Route::middleware(['auth', 'aktif'])->group(function () {
 
 // ------------------------
 
+// List seluruh UMKM
+Route::get('/umkm', [\App\Http\Controllers\UmkmController::class, 'index'])->name('umkm.index');
+
+// List UMKM menjelang expired (3 bulan ke depan)
+Route::get('/umkm-expiring', [\App\Http\Controllers\UmkmController::class, 'expiring'])->name('umkm.expiring');
+
+// List UMKM yang expired
+Route::get('/umkm-expired', [\App\Http\Controllers\UmkmController::class, 'expired'])->name('umkm.expired');
+
+// List UMKM yang menunggu aktivasi
+Route::get('/umkm-pending', [\App\Http\Controllers\UmkmController::class, 'pending'])->name('umkm.pending');
+
+// ------------------------
+// Untuk method POST, sesuai dengan form di blade
+Route::post('/aktivasi/perpanjang/{id}', [\App\Http\Controllers\AktivasiController::class, 'perpanjang'])->name('aktivasi.perpanjang');
+// ------------------------
+
 Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
 
 // ------------------------
