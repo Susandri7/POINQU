@@ -55,32 +55,76 @@ class LandingPageController extends Controller
     public function update(Request $request, $id)
     {
         $page = LandingPage::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
-
+    
         $request->validate([
             'slug' => 'required|alpha_dash|unique:landing_pages,slug,'.$page->id,
             'judul' => 'required|string|max:255',
             'gambar' => 'nullable|image|max:2048',
-            // Untuk fitur baru, konten dan form_fields boleh array dan nullable
             'konten' => 'nullable|array',
             'form_fields' => 'nullable|array',
         ]);
-
-        // Ganti gambar jika diupload baru
+    
+        // -------- 1. Ambil semua path gambar lama dari konten lama
+        $oldImagePaths = [];
+        $oldKonten = is_array($page->konten) ? $page->konten : [];
+        foreach ($oldKonten as $item) {
+            if (isset($item['type']) && $item['type'] === 'image' && !empty($item['value']) && !str_starts_with($item['value'], 'data:')) {
+                $oldImagePaths[] = $item['value'];
+            }
+        }
+    
+        // -------- 2. Proses konten baru & upload file baru
+        $konten = [];
+        $newImagePaths = [];
+        if ($request->has('konten')) {
+            foreach ($request->konten as $idx => $item) {
+                if (
+                    isset($item['type']) && $item['type'] === 'image' &&
+                    $request->hasFile("konten.$idx.file")
+                ) {
+                    $imgFile = $request->file("konten.$idx.file");
+                    $imgPath = $imgFile->store('landing-pages/konten', 'public');
+                    $item['value'] = $imgPath;
+                }
+                if (
+                    isset($item['type']) && $item['type'] === 'image' &&
+                    isset($item['value']) && !str_starts_with($item['value'], 'data:')
+                ) {
+                    $newImagePaths[] = $item['value'];
+                }
+                if (
+                    isset($item['type']) && $item['type'] === 'image' &&
+                    isset($item['value']) && str_starts_with($item['value'], 'data:')
+                ) {
+                    unset($item['value']);
+                }
+                $konten[] = $item;
+            }
+        }
+    
+        // -------- 3. Hapus SEMUA file gambar lama yang tidak dipakai lagi di konten baru
+        $filesToDelete = array_diff($oldImagePaths, $newImagePaths);
+        foreach ($filesToDelete as $delPath) {
+            if (\Storage::disk('public')->exists($delPath)) {
+                \Storage::disk('public')->delete($delPath);
+            }
+        }
+    
+        // -------- 4. Handle gambar utama landing page
         if ($request->hasFile('gambar')) {
-            if ($page->gambar && Storage::exists('public/'.$page->gambar)) {
-                Storage::delete('public/'.$page->gambar);
+            if ($page->gambar && \Storage::disk('public')->exists($page->gambar)) {
+                \Storage::disk('public')->delete($page->gambar);
             }
             $file = $request->file('gambar')->store('landing-pages', 'public');
             $page->gambar = $file;
         }
-
+    
         $page->slug = $request->slug;
         $page->judul = $request->judul;
-        // Simpan konten dan form_fields sebagai array (akan otomatis jadi JSON di DB)
-        $page->konten = $request->has('konten') ? array_values($request->konten) : [];
+        $page->konten = $konten;
         $page->form_fields = $request->has('form_fields') ? array_values($request->form_fields) : [];
         $page->save();
-
+    
         return redirect()->route('landing.index')->with('success', 'Landing Page berhasil diupdate!');
     }
 

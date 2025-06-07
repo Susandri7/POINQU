@@ -40,6 +40,17 @@
                                     class="w-14 h-10 p-0 border-2 border-yellow-200 rounded shadow">
                             </div>
                         </div>
+
+                        <div class="mb-4">
+    <label class="block font-semibold text-gray-700 mb-1">Gambar Utama Landing Page</label>
+    @if($page->gambar)
+        <img src="{{ asset('storage/' . $page->gambar) }}" class="h-32 rounded mb-2">
+    @endif
+    <input type="file" name="gambar" class="block mt-1">
+    <small class="text-gray-400">Upload gambar baru untuk mengganti gambar utama.</small>
+</div>
+
+
                         {{-- DRAG & DROP KONTEN --}}
                         <div class="mb-6">
                             <label class="block font-bold mb-2">Susun Elemen Konten (Drag & Drop)</label>
@@ -50,30 +61,33 @@
                                         :style="`color: ${textColor}`">
                                         <span class="cursor-move mr-3 text-gray-400 text-2xl select-none">&#x2630;</span>
                                         <!-- IMAGE -->
-                                        <template x-if="item.type === 'image'">
-                                            <div class="w-full">
-                                                <input type="hidden" :name="'konten['+idx+'][type]'" value="image">
-                                                <input type="hidden" :name="'konten['+idx+'][value]'" :value="item.value">
-                                                <template x-if="item.value">
-                                                    <img :src="previewImage(item.value)" class="h-24 rounded mb-2 shadow">
-                                                </template>
-                                                <input type="file" @change="updateImage($event, idx)">
-                                                <small class="text-gray-400">Upload gambar baru untuk mengganti.</small>
-                                            </div>
-                                        </template>
+                                        <!-- IMAGE -->
+<template x-if="item.type === 'image'">
+    <div class="w-full">
+        <input type="hidden" :name="'konten['+idx+'][type]'" value="image">
+        <input type="hidden" :name="'konten['+idx+'][value]'" :value="item.value">
+        <input type="hidden" :name="'konten['+idx+'][old_value]'" :value="item.value"> <!-- Tambahkan ini -->
+        <template x-if="item.value">
+            <img :src="previewImage(item.value)" class="h-24 rounded mb-2 shadow">
+        </template>
+        <input type="file" :name="'konten['+idx+'][file]'" @change="updateImage($event, idx)">
+        <small class="text-gray-400">Upload gambar baru untuk mengganti.</small>
+    </div>
+</template>
                                         <!-- HEADING -->
                                         <template x-if="item.type === 'heading'">
                                             <div class="w-full">
                                                 <input type="hidden" :name="'konten['+idx+'][type]'" value="heading">
                                                 <div
                                                     contenteditable="true"
-                                                    @input="item.value = $event.target.innerText"
+                                                    :ref="'editable'+idx"
+                                                    @input="item.value = $refs['editable'+idx].innerText; $refs['hidden'+idx].value = item.value"
                                                     :style="styleString(item.style)"
                                                     class="border rounded py-2 px-2 bg-white mb-1 text-xl focus:outline-yellow-400"
                                                     x-text="item.value"
                                                     style="min-height:38px;"
                                                 ></div>
-                                                <input type="hidden" :name="'konten['+idx+'][value]'" :value="item.value">
+                                                <input type="hidden" :name="'konten['+idx+'][value]'" :value="item.value" :ref="'hidden'+idx">
                                                 <div class="flex flex-wrap gap-2 mt-2">
                                                     <button type="button" @click="toggleStyle(idx, 'bold')" :class="toolbarBtnClass(item, 'bold')"><b>B</b></button>
                                                     <button type="button" @click="toggleStyle(idx, 'italic')" :class="toolbarBtnClass(item, 'italic')"><i>I</i></button>
@@ -94,13 +108,14 @@
                                                 <input type="hidden" :name="'konten['+idx+'][type]'" value="text">
                                                 <div
                                                     contenteditable="true"
-                                                    @input="item.value = $event.target.innerText"
+                                                    :ref="'editable'+idx"
+                                                    @input="item.value = $refs['editable'+idx].innerText; $refs['hidden'+idx].value = item.value"
                                                     :style="styleString(item.style)"
                                                     class="border rounded py-2 px-2 bg-white mb-1 focus:outline-yellow-400"
                                                     x-text="item.value"
                                                     style="min-height:38px;"
                                                 ></div>
-                                                <input type="hidden" :name="'konten['+idx+'][value]'" :value="item.value">
+                                                <input type="hidden" :name="'konten['+idx+'][value]'" :value="item.value" :ref="'hidden'+idx">
                                                 <div class="flex flex-wrap gap-2 mt-2">
                                                     <button type="button" @click="toggleStyle(idx, 'bold')" :class="toolbarBtnClass(item, 'bold')"><b>B</b></button>
                                                     <button type="button" @click="toggleStyle(idx, 'italic')" :class="toolbarBtnClass(item, 'italic')"><i>I</i></button>
@@ -192,7 +207,8 @@
                 bgColor: '#ffe082',
                 textColor: '#573500',
                 init(initData, bg, text) {
-                    this.kontens = Array.isArray(initData) && initData.length ? initData : [
+                    // Deep copy so Alpine doesn't reference old object
+                    this.kontens = Array.isArray(initData) && initData.length ? JSON.parse(JSON.stringify(initData)) : [
                         {type:'heading', value:'Judul Landing', style:{bold:true, align:'center', fontSize:26}}
                     ];
                     this.bgColor = bg || '#ffe082';
